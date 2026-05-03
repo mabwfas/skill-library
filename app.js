@@ -60,11 +60,11 @@ async function loadSkills() {
 function updateDbModeIndicator() {
     const el = document.getElementById('dbMode');
     if (window.DB.isCloudMode()) {
-        el.innerHTML = '☁ Cloud';
-        el.style.color = 'var(--success)';
+        el.textContent = 'Cloud · Synced';
+        el.classList.add('cloud');
     } else {
-        el.innerHTML = '💾 Local';
-        el.style.color = 'var(--text-mute)';
+        el.textContent = 'Local';
+        el.classList.remove('cloud');
     }
 }
 
@@ -159,19 +159,13 @@ function renderCarousel() {
 
     track.innerHTML = filtered.map(s => {
         const color = categoryColor(s.category);
-        const tag = (s.tags && s.tags[0]) || '';
         return `
             <div class="book ${s.id === state.currentId ? 'active' : ''}" data-id="${s.id}" data-color="${color}">
                 <div class="book-cover">
                     <div class="book-inner">
-                        <div class="book-page book-page-left">
-                            <div class="book-category">${escapeHtml(s.category || 'General')}</div>
-                            <div class="book-title">${escapeHtml(s.name)}</div>
-                        </div>
-                        <div class="book-page book-page-right">
-                            <div class="book-desc">${escapeHtml(snippet(s.body, 220))}</div>
-                            ${tag ? `<div class="book-tag">${escapeHtml(tag)}</div>` : ''}
-                        </div>
+                        <div class="book-page book-page-left"></div>
+                        <div class="book-page book-page-right"></div>
+                        <div class="book-title-center">${escapeHtml(s.name)}</div>
                         <div class="book-bookmark"></div>
                     </div>
                 </div>

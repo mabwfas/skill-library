@@ -5,31 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Library</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Crimson+Pro:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Crimson+Pro:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="app" id="app">
         <!-- Mobile toggle -->
-        <button class="mobile-menu" id="mobileMenu" title="Menu">☰</button>
+        <button class="mobile-menu" id="mobileMenu" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
 
         <!-- Left Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-wrap">
-                    <div class="logo">📚</div>
-                    <h1>Skills</h1>
+                    <div class="logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </div>
+                    <h1>Library</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-icon-sm" id="settingsBtn" title="Cloud / Supabase">☁</button>
-                    <button class="btn-icon-sm" id="bulkAddBtn" title="Bulk add / Import">📥</button>
-                    <button class="btn-add" id="addSkillBtn" title="New skill (Ctrl+N)">+</button>
+                    <button class="btn-icon-sm" id="settingsBtn" aria-label="Cloud / Supabase settings" title="Cloud / Supabase">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.65-8.69A6 6 0 0 0 4 13a4 4 0 0 0 4 4z"/></svg>
+                    </button>
+                    <button class="btn-icon-sm" id="bulkAddBtn" aria-label="Bulk add / Import" title="Bulk add / Import">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <button class="btn-add" id="addSkillBtn" aria-label="New skill" title="New skill (Ctrl+N)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
                 </div>
             </div>
 
             <div class="search-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Search… (Ctrl+K)">
+                <span class="search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="Search the archive…" aria-label="Search">
             </div>
 
             <div class="category-chips" id="categoryChips"></div>
@@ -38,8 +52,10 @@
 
             <div class="sidebar-footer">
                 <span id="skillCount">0 skills</span>
-                <span class="db-mode" id="dbMode" title="Storage mode">💾 Local</span>
-                <button class="btn-text" id="exportBtn" title="Export all">⤓</button>
+                <span class="db-mode" id="dbMode" title="Storage mode">Local</span>
+                <button class="btn-text" id="exportBtn" aria-label="Export all" title="Export all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
             </div>
         </aside>
 
@@ -47,12 +63,13 @@
         <main class="carousel-area">
             <div class="carousel-header">
                 <div class="header-left">
+                    <span class="header-eyebrow">Collection</span>
                     <h2 id="categoryTitle">All Skills</h2>
                     <span class="count-badge" id="visibleCount">0</span>
                 </div>
                 <div class="carousel-controls">
-                    <button class="ctrl-btn" id="prevBtn" title="Previous">‹</button>
-                    <button class="ctrl-btn" id="nextBtn" title="Next">›</button>
+                    <button class="ctrl-btn" id="prevBtn" aria-label="Previous">‹</button>
+                    <button class="ctrl-btn" id="nextBtn" aria-label="Next">›</button>
                 </div>
             </div>
 
@@ -62,15 +79,19 @@
                 </div>
 
                 <div class="empty-state" id="emptyState">
-                    <div class="empty-icon">📖</div>
-                    <h3>No skills found</h3>
-                    <p>Try a different search, or click <strong>+</strong> to add one.</p>
-                    <button class="btn-primary" id="emptyAddBtn">+ Add your first skill</button>
+                    <div class="empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </div>
+                    <h3>The shelves are empty</h3>
+                    <p>Begin your archive — add your first piece of knowledge.</p>
+                    <button class="btn-primary" id="emptyAddBtn">Add a skill</button>
                 </div>
             </div>
 
             <div class="carousel-hint">
-                <span>← Drag • Scroll • Use arrows →</span>
+                <span class="hint-rule"></span>
+                <span class="hint-text">Open a volume to read</span>
+                <span class="hint-rule"></span>
             </div>
         </main>
 

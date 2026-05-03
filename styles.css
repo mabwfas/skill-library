@@ -3,40 +3,63 @@
    ========================================== */
 
 :root {
-    --bg: #0a0a14;
-    --bg-elev: #11112a;
-    --bg-card: #1a1a35;
-    --bg-card-hi: #22224a;
-    --border: #2a2a4a;
-    --border-hi: #3d3d6a;
-    --text: #f0f0fa;
-    --text-dim: #9a9ac0;
-    --text-mute: #606080;
-    --accent: #7c5cff;
-    --accent-hi: #a78bfa;
-    --accent-glow: rgba(124, 92, 255, 0.4);
-    --accent-soft: rgba(124, 92, 255, 0.12);
-    --danger: #ff5c7c;
-    --success: #4ade80;
-    --warn: #fbbf24;
+    /* Midnight Library palette — deep ink + amber/brass + parchment */
+    --bg:          #0c0a14;   /* near-black with violet undertone */
+    --bg-elev:     #14111f;
+    --bg-card:     #1c1828;
+    --bg-card-hi:  #2a2438;
+    --border:      #2a2438;
+    --border-hi:   #3e3551;
+    --text:        #efe9d8;   /* warm parchment-tinted white */
+    --text-dim:    #a8a18c;   /* aged ivory */
+    --text-mute:   #6c6552;
+    --accent:      #d4a44a;   /* brass / gilded brass */
+    --accent-hi:   #f0c870;   /* candlelight gold */
+    --accent-glow: rgba(212, 164, 74, 0.35);
+    --accent-soft: rgba(212, 164, 74, 0.12);
+    --danger:      #d94f3a;   /* oxblood */
+    --success:     #6fa886;   /* sage */
+    --warn:        #d4a44a;
+    --ink-deep:    #0a0813;   /* deepest void for letterpress feel */
 
-    --book-1: linear-gradient(135deg, #7c5cff 0%, #5d3fd6 100%);
-    --book-2: linear-gradient(135deg, #ff5c7c 0%, #d63f5c 100%);
-    --book-3: linear-gradient(135deg, #4ade80 0%, #2da55a 100%);
-    --book-4: linear-gradient(135deg, #fbbf24 0%, #d68f0a 100%);
-    --book-5: linear-gradient(135deg, #38bdf8 0%, #0a8ad6 100%);
-    --book-6: linear-gradient(135deg, #f472b6 0%, #d63f95 100%);
-    --book-7: linear-gradient(135deg, #a78bfa 0%, #7c5cff 100%);
-    --book-8: linear-gradient(135deg, #2dd4bf 0%, #0a9d8a 100%);
+    /* Book bindings — leather-bound spectrum */
+    --book-1: linear-gradient(135deg, #4a2540 0%, #2a1226 100%);  /* burgundy */
+    --book-2: linear-gradient(135deg, #1c3140 0%, #0d1c2a 100%);  /* navy */
+    --book-3: linear-gradient(135deg, #2c4a2c 0%, #15281a 100%);  /* forest */
+    --book-4: linear-gradient(135deg, #6b4220 0%, #3d2410 100%);  /* tan leather */
+    --book-5: linear-gradient(135deg, #2a3a4a 0%, #15202c 100%);  /* slate */
+    --book-6: linear-gradient(135deg, #5a2a35 0%, #2c1219 100%);  /* claret */
+    --book-7: linear-gradient(135deg, #3d2a4a 0%, #1f1228 100%);  /* aubergine */
+    --book-8: linear-gradient(135deg, #4a3920 0%, #28200f 100%);  /* tobacco */
 
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow: 0 8px 28px rgba(0,0,0,0.45);
-    --shadow-hi: 0 16px 48px rgba(124,92,255,0.35), 0 0 0 1px rgba(124,92,255,0.2);
+    /* Bookmarks — bright silk ribbons against dark covers */
+    --bookmark-1: #d4a44a;
+    --bookmark-2: #f0c870;
+    --bookmark-3: #8db98d;
+    --bookmark-4: #d94f3a;
+    --bookmark-5: #b8c4d8;
+    --bookmark-6: #d4a44a;
+    --bookmark-7: #f0c870;
+    --bookmark-8: #8db98d;
+
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+    --shadow:    0 10px 32px rgba(0,0,0,0.55);
+    --shadow-hi: 0 20px 56px rgba(212,164,74,0.22), 0 0 0 1px rgba(212,164,74,0.18);
     --radius: 14px;
     --radius-sm: 8px;
     --radius-lg: 20px;
-    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Focus ring — accessibility */
+    --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,17 +69,41 @@ html, body {
     height: 100%;
     background: var(--bg);
     background-image:
-        radial-gradient(circle at 15% 20%, rgba(124, 92, 255, 0.08), transparent 40%),
-        radial-gradient(circle at 85% 80%, rgba(244, 114, 182, 0.06), transparent 40%);
+        radial-gradient(circle at 12% 18%, rgba(212, 164, 74, 0.06), transparent 38%),
+        radial-gradient(circle at 88% 82%, rgba(74, 37, 64, 0.08), transparent 42%);
     color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     font-size: 14px;
+    line-height: 1.6;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 button { font-family: inherit; }
 input, textarea { font-family: inherit; }
+
+/* Universal focus ring — accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.book:focus-visible,
+.nav-item:focus-visible,
+.chip:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* SVG icon defaults */
+svg { display: block; flex-shrink: 0; }
+.btn-icon-sm svg, .btn-icon svg, .btn-add svg, .ctrl-btn svg, .btn-text svg {
+    width: 16px; height: 16px;
+}
+.btn-add svg { width: 18px; height: 18px; }
+.search-icon svg { width: 14px; height: 14px; }
+.logo svg { width: 22px; height: 22px; color: var(--accent); }
+.empty-icon svg { width: 56px; height: 56px; opacity: 0.5; color: var(--accent); }
+.mobile-menu svg { width: 20px; height: 20px; }
 
 /* App grid */
 .app {
@@ -121,54 +168,53 @@ input, textarea { font-family: inherit; }
 }
 
 .sidebar-header h1 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #fff, var(--accent-hi));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    color: var(--text);
+    line-height: 1;
 }
 
 .header-actions { display: flex; gap: 6px; }
 
 .btn-add {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), #5d3fd6);
-    color: #fff;
-    font-size: 1.3rem;
-    font-weight: 600;
+    border: 1px solid var(--accent);
+    background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+    color: var(--ink-deep);
     cursor: pointer;
     transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 16px var(--accent-glow);
-    line-height: 1;
+    box-shadow: 0 4px 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 .btn-add:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 22px var(--accent-glow);
+    box-shadow: 0 6px 22px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3);
 }
+.btn-add:active { transform: translateY(0); }
 
 .btn-icon-sm {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
     border: 1px solid var(--border);
     background: var(--bg-card);
     color: var(--text-dim);
-    font-size: 0.95rem;
     cursor: pointer;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .btn-icon-sm:hover {
     background: var(--bg-card-hi);
-    color: var(--text);
-    border-color: var(--border-hi);
+    color: var(--accent-hi);
+    border-color: var(--accent);
 }
 
 .search-wrap {
@@ -178,12 +224,14 @@ input, textarea { font-family: inherit; }
 
 .search-icon {
     position: absolute;
-    left: 30px;
+    left: 28px;
     top: 50%;
     transform: translateY(-50%);
-    opacity: 0.6;
+    opacity: 0.55;
     pointer-events: none;
-    font-size: 0.85rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
 }
 
 #searchInput {
@@ -191,12 +239,14 @@ input, textarea { font-family: inherit; }
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 9px 12px 9px 34px;
+    padding: 10px 12px 10px 36px;
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    font-family: 'Manrope', sans-serif;
     outline: none;
     transition: all var(--transition-fast);
 }
+#searchInput::placeholder { color: var(--text-mute); font-style: italic; }
 #searchInput:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
@@ -211,24 +261,27 @@ input, textarea { font-family: inherit; }
 }
 
 .chip {
-    padding: 4px 10px;
+    padding: 5px 11px;
     border-radius: 20px;
-    background: var(--bg-card);
+    background: transparent;
     color: var(--text-dim);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
     border: 1px solid var(--border);
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 .chip:hover {
-    background: var(--bg-card-hi);
+    background: var(--bg-card);
     color: var(--text);
+    border-color: var(--border-hi);
 }
 .chip.active {
     background: var(--accent);
-    color: #fff;
+    color: var(--ink-deep);
     border-color: var(--accent);
     box-shadow: 0 2px 12px var(--accent-glow);
 }
@@ -246,34 +299,36 @@ input, textarea { font-family: inherit; }
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
+    gap: 12px;
+    padding: 10px 14px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--text-dim);
     font-size: 0.88rem;
+    font-weight: 500;
     transition: all var(--transition-fast);
-    border: 1px solid transparent;
+    border-left: 2px solid transparent;
     user-select: none;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    position: relative;
 }
 .nav-item:hover {
     background: var(--bg-card);
     color: var(--text);
-    transform: translateX(2px);
+    border-left-color: var(--border-hi);
 }
 .nav-item.active {
-    background: var(--accent-soft);
+    background: linear-gradient(90deg, var(--accent-soft), transparent);
     color: var(--accent-hi);
-    border-color: var(--border-hi);
+    border-left-color: var(--accent);
 }
 
 .nav-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
-    box-shadow: 0 0 8px currentColor;
+    opacity: 0.85;
 }
 
 .nav-name {
@@ -284,34 +339,45 @@ input, textarea { font-family: inherit; }
 }
 
 .sidebar-footer {
-    padding: 12px 18px;
+    padding: 14px 18px;
     border-top: 1px solid var(--border);
     color: var(--text-mute);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
+    font-weight: 500;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .btn-text {
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-dim);
-    font-size: 1rem;
     cursor: pointer;
-    transition: color var(--transition-fast);
-    padding: 4px 8px;
+    transition: all var(--transition-fast);
+    padding: 6px 8px;
     border-radius: 6px;
+    display: flex;
+    align-items: center;
 }
-.btn-text:hover { color: var(--accent-hi); background: var(--bg-card); }
+.btn-text:hover { color: var(--accent-hi); background: var(--bg-card); border-color: var(--border); }
 
 .db-mode {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 4px;
     background: var(--bg-card);
     border: 1px solid var(--border);
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+.db-mode.cloud {
+    color: var(--accent-hi);
+    background: var(--accent-soft);
+    border-color: var(--accent);
 }
 
 /* Cloud modal field rows */
@@ -379,28 +445,61 @@ input, textarea { font-family: inherit; }
 
 .carousel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     flex-shrink: 0;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+}
+/* Decorative gilded rule under header — the differentiation anchor */
+.carousel-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
 }
 
-.header-left { display: flex; align-items: baseline; gap: 12px; }
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.header-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+}
 
 .carousel-header h2 {
-    font-size: 1.7rem;
-    font-weight: 800;
-    letter-spacing: -0.025em;
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1;
+    color: var(--text);
 }
 
 .count-badge {
+    align-self: flex-start;
     padding: 3px 10px;
-    background: var(--accent-soft);
-    color: var(--accent-hi);
-    border-radius: 20px;
-    font-size: 0.78rem;
+    background: transparent;
+    color: var(--text-mute);
+    border-radius: 4px;
+    font-size: 0.72rem;
     font-weight: 600;
-    border: 1px solid var(--border-hi);
+    border: 1px solid var(--border);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
 }
 
 .carousel-controls { display: flex; gap: 8px; }
@@ -443,21 +542,20 @@ input, textarea { font-family: inherit; }
 }
 
 .carousel-track {
-    display: flex;
-    gap: 28px;
-    overflow-x: auto;
-    overflow-y: visible;
-    scroll-snap-type: x mandatory;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 22px;
+    overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
-    padding: 24px 32px 40px;
+    padding: 24px 32px 32px;
     height: 100%;
-    align-items: center;
+    align-content: start;
+    justify-items: center;
     scrollbar-width: thin;
     scrollbar-color: var(--border-hi) transparent;
-    cursor: grab;
 }
-.carousel-track.dragging { cursor: grabbing; scroll-behavior: auto; }
-.carousel-track::-webkit-scrollbar { height: 8px; }
+.carousel-track::-webkit-scrollbar { width: 8px; }
 .carousel-track::-webkit-scrollbar-track { background: transparent; }
 .carousel-track::-webkit-scrollbar-thumb {
     background: var(--border-hi);
@@ -465,32 +563,45 @@ input, textarea { font-family: inherit; }
 }
 .carousel-track::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
+/* Hide prev/next + drag hint in grid mode */
+.carousel-controls { display: none; }
+
 .carousel-hint {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
     color: var(--text-mute);
-    font-size: 0.74rem;
-    padding: 4px 0 8px;
-    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+    padding: 6px 0 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     flex-shrink: 0;
 }
+.hint-rule {
+    flex: 0 0 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+}
+.hint-text { font-variant: small-caps; font-weight: 600; }
 
 /* ==========================================
    Books — OPEN book design (two pages + spine)
    ========================================== */
 .book {
-    flex-shrink: 0;
-    width: clamp(320px, 32vw, 420px);
-    height: clamp(240px, 26vw, 300px);
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 4 / 3;
     position: relative;
     cursor: pointer;
-    scroll-snap-align: center;
     transition: transform var(--transition);
     perspective: 1400px;
+    border-radius: 14px;
 }
+.book:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.book:hover { transform: translateY(-6px); }
 
-.book:hover { transform: translateY(-8px) scale(1.02); }
-
-/* The cover wraps under the open pages — colored binding visible top/bottom + behind spine */
+/* The cover — leather binding wraps under the open pages */
 .book-cover {
     position: relative;
     width: 100%;
@@ -500,27 +611,31 @@ input, textarea { font-family: inherit; }
     transition: box-shadow var(--transition), transform var(--transition);
     transform-style: preserve-3d;
     padding: 14px;
+    /* Brass-gilded edge */
+    border: 1px solid rgba(212, 164, 74, 0.18);
 }
 
 .book:hover .book-cover {
     box-shadow: var(--shadow-hi);
-    transform: rotateX(4deg);
+    transform: rotateX(3deg);
+    border-color: rgba(212, 164, 74, 0.35);
 }
 
-/* The two-page interior */
+/* The two-page interior — aged parchment */
 .book-inner {
     position: relative;
     width: 100%;
     height: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: linear-gradient(180deg, #fdf6e6 0%, #f4ebd3 100%);
+    background:
+        radial-gradient(ellipse at 50% 50%, #fdf6e3 0%, #f1e6c9 80%, #e8d9b3 100%);
     border-radius: 4px;
     box-shadow:
-        inset 0 0 30px rgba(120, 85, 40, 0.18),
-        inset 0 0 0 1px rgba(120, 85, 40, 0.15);
+        inset 0 0 40px rgba(120, 85, 40, 0.22),
+        inset 0 0 0 1px rgba(120, 85, 40, 0.18);
     overflow: hidden;
-    color: #2a2418;
+    color: var(--ink-deep);
 }
 
 /* Center spine — the fold */
@@ -558,22 +673,15 @@ input, textarea { font-family: inherit; }
     z-index: 4;
 }
 
-/* Each page */
+/* Each page — empty parchment surface (lines + texture only) */
 .book-page {
     position: relative;
-    padding: 22px 22px;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
     z-index: 2;
 }
 
 .book-page-left {
     border-right: 1px solid rgba(120, 85, 40, 0.12);
-    padding-right: 28px;
-}
-.book-page-right {
-    padding-left: 28px;
 }
 
 /* Faux page lines (handwriting paper) */
@@ -591,94 +699,74 @@ input, textarea { font-family: inherit; }
     opacity: 0.45;
 }
 
-.book-page > * { position: relative; z-index: 1; }
-
-/* Left page: category banner + title */
-.book-category {
-    display: inline-block;
-    align-self: flex-start;
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: #fff;
-    margin-bottom: 14px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-.book-title {
+/* The single, centered title spans both pages — letterpress feel */
+.book-title-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 28px 44px;
+    z-index: 6;
     font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 1.55rem;
-    font-weight: 700;
+    font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+    font-weight: 600;
     line-height: 1.15;
-    letter-spacing: -0.01em;
-    color: #1a1408;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    -webkit-box-orient: vertical;
-    margin-top: auto;
-    margin-bottom: auto;
+    letter-spacing: 0.005em;
+    color: var(--ink-deep);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    word-break: break-word;
+    hyphens: auto;
+}
+/* Decorative ornament under title — adds editorial weight */
+.book-title-center::after {
+    content: '·';
+    margin-top: 8px;
+    color: rgba(120, 85, 40, 0.55);
+    font-size: 1.4rem;
+    line-height: 0.4;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;
+}
+.book-title-center::before {
+    content: '';
+    width: 36px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(120, 85, 40, 0.4), transparent);
+    margin-bottom: 10px;
 }
 
-/* Right page: description + tag */
-.book-desc {
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: #3d3422;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 7;
-    line-clamp: 7;
-    -webkit-box-orient: vertical;
-    flex: 1;
-}
-
-.book-tag {
-    display: inline-block;
-    padding: 4px 10px;
-    background: rgba(120, 85, 40, 0.12);
-    color: #5d4218;
-    border-radius: 4px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    margin-top: 10px;
-    width: fit-content;
-    border: 1px solid rgba(120, 85, 40, 0.2);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-/* Bookmark ribbon */
+/* Silk bookmark ribbon */
 .book-bookmark {
     position: absolute;
-    top: 0;
-    right: 36px;
-    width: 14px;
-    height: 36px;
-    z-index: 6;
-    background: currentColor;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    top: -2px;
+    right: 30px;
+    width: 12px;
+    height: 38px;
+    z-index: 7;
+    background: linear-gradient(180deg, currentColor 0%, color-mix(in srgb, currentColor 80%, black) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.35);
 }
 
-/* Active book glow */
+/* Active book — gilded brass border + warm halo */
 .book.active .book-cover {
     box-shadow: var(--shadow-hi);
     transform: rotateX(2deg) scale(1.02);
+    border-color: var(--accent);
 }
 .book.active::after {
     content: '';
     position: absolute;
-    inset: -10px;
-    border-radius: 20px;
+    inset: -12px;
+    border-radius: 22px;
     background: var(--accent);
-    opacity: 0.2;
+    opacity: 0.18;
     z-index: -1;
-    filter: blur(24px);
+    filter: blur(28px);
+    pointer-events: none;
 }
 
 /* Color variants — only the cover/binding color changes; pages stay cream */
@@ -700,14 +788,14 @@ input, textarea { font-family: inherit; }
 .book[data-color="6"] .book-category { background: #7c5cff; }
 .book[data-color="7"] .book-category { background: #0a9d8a; }
 
-.book[data-color="0"] .book-bookmark { color: #ff5c7c; }
-.book[data-color="1"] .book-bookmark { color: #fbbf24; }
-.book[data-color="2"] .book-bookmark { color: #f472b6; }
-.book[data-color="3"] .book-bookmark { color: #7c5cff; }
-.book[data-color="4"] .book-bookmark { color: #ff5c7c; }
-.book[data-color="5"] .book-bookmark { color: #4ade80; }
-.book[data-color="6"] .book-bookmark { color: #38bdf8; }
-.book[data-color="7"] .book-bookmark { color: #fbbf24; }
+.book[data-color="0"] .book-bookmark { color: var(--bookmark-1); }
+.book[data-color="1"] .book-bookmark { color: var(--bookmark-2); }
+.book[data-color="2"] .book-bookmark { color: var(--bookmark-3); }
+.book[data-color="3"] .book-bookmark { color: var(--bookmark-4); }
+.book[data-color="4"] .book-bookmark { color: var(--bookmark-5); }
+.book[data-color="5"] .book-bookmark { color: var(--bookmark-6); }
+.book[data-color="6"] .book-bookmark { color: var(--bookmark-7); }
+.book[data-color="7"] .book-bookmark { color: var(--bookmark-8); }
 
 /* Empty state */
 .empty-state {
@@ -717,13 +805,20 @@ input, textarea { font-family: inherit; }
     align-items: center;
     justify-content: center;
     color: var(--text-dim);
-    gap: 14px;
+    gap: 16px;
     text-align: center;
     padding: 40px;
 }
-.empty-icon { font-size: 4rem; opacity: 0.5; }
-.empty-state h3 { font-size: 1.2rem; color: var(--text); }
-.empty-state p { color: var(--text-mute); }
+.empty-icon { color: var(--accent); opacity: 0.55; }
+.empty-state h3 {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 8px;
+}
+.empty-state p { color: var(--text-mute); font-style: italic; }
+.empty-state .btn-primary { margin-top: 8px; }
 
 /* ==========================================
    Editor Panel
@@ -767,9 +862,10 @@ input, textarea { font-family: inherit; }
     background: transparent;
     border: none;
     color: var(--text);
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
     outline: none;
     padding: 4px 8px;
     border-radius: 6px;
@@ -848,13 +944,14 @@ input, textarea { font-family: inherit; }
     background: var(--bg);
     border: none;
     color: var(--text);
-    padding: 22px 26px;
-    font-family: 'Inter', system-ui, sans-serif;
+    padding: 24px 28px;
+    font-family: 'Manrope', system-ui, sans-serif;
     font-size: 0.95rem;
-    line-height: 1.7;
+    line-height: 1.75;
     resize: none;
     outline: none;
 }
+.editor-body::placeholder { color: var(--text-mute); font-style: italic; }
 
 .editor-foot {
     display: flex;
@@ -1012,21 +1109,24 @@ input, textarea { font-family: inherit; }
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #5d3fd6);
-    color: #fff;
-    border: none;
-    padding: 9px 18px;
+    background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+    color: var(--ink-deep);
+    border: 1px solid var(--accent);
+    padding: 10px 20px;
     border-radius: 9px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: 0 4px 14px var(--accent-glow);
+    box-shadow: 0 4px 14px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px var(--accent-glow);
+    box-shadow: 0 6px 20px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3);
 }
+.btn-primary:active { transform: translateY(0); }
 
 .btn-secondary {
     background: var(--bg-card);
