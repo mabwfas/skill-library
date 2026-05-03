@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Library</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Crimson+Pro:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Mobile toggle -->
+        <button class="mobile-menu" id="mobileMenu" title="Menu">☰</button>
+
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-wrap">
+                    <div class="logo">📚</div>
+                    <h1>Skills</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon-sm" id="settingsBtn" title="Cloud / Supabase">☁</button>
+                    <button class="btn-icon-sm" id="bulkAddBtn" title="Bulk add / Import">📥</button>
+                    <button class="btn-add" id="addSkillBtn" title="New skill (Ctrl+N)">+</button>
+                </div>
+            </div>
+
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search… (Ctrl+K)">
+            </div>
+
+            <div class="category-chips" id="categoryChips"></div>
+
+            <nav class="skill-nav" id="skillNav"></nav>
+
+            <div class="sidebar-footer">
+                <span id="skillCount">0 skills</span>
+                <span class="db-mode" id="dbMode" title="Storage mode">💾 Local</span>
+                <button class="btn-text" id="exportBtn" title="Export all">⤓</button>
+            </div>
+        </aside>
+
+        <!-- Center Carousel -->
+        <main class="carousel-area">
+            <div class="carousel-header">
+                <div class="header-left">
+                    <h2 id="categoryTitle">All Skills</h2>
+                    <span class="count-badge" id="visibleCount">0</span>
+                </div>
+                <div class="carousel-controls">
+                    <button class="ctrl-btn" id="prevBtn" title="Previous">‹</button>
+                    <button class="ctrl-btn" id="nextBtn" title="Next">›</button>
+                </div>
+            </div>
+
+            <div class="carousel-wrap">
+                <div class="carousel" id="carousel">
+                    <div class="carousel-track" id="carouselTrack"></div>
+                </div>
+
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📖</div>
+                    <h3>No skills found</h3>
+                    <p>Try a different search, or click <strong>+</strong> to add one.</p>
+                    <button class="btn-primary" id="emptyAddBtn">+ Add your first skill</button>
+                </div>
+            </div>
+
+            <div class="carousel-hint">
+                <span>← Drag • Scroll • Use arrows →</span>
+            </div>
+        </main>
+
+        <!-- Right Editor Panel -->
+        <section class="editor" id="editor" aria-hidden="true">
+            <div class="editor-head">
+                <div class="editor-head-left">
+                    <input type="text" id="editorTitle" placeholder="Skill name…" class="editor-title">
+                    <input type="text" id="editorCategory" placeholder="Category" class="editor-category">
+                </div>
+                <div class="editor-actions">
+                    <button class="btn-icon" id="saveBtn" title="Save (Ctrl+S)">💾</button>
+                    <button class="btn-icon" id="duplicateBtn" title="Duplicate">⎘</button>
+                    <button class="btn-icon btn-danger" id="deleteBtn" title="Delete">🗑️</button>
+                    <button class="btn-icon" id="closeBtn" title="Close (Esc)">✕</button>
+                </div>
+            </div>
+            <div class="editor-meta">
+                <input type="text" id="editorTags" placeholder="Tags, comma, separated" class="editor-tags">
+            </div>
+            <textarea id="editorBody" class="editor-body" placeholder="Write skill instructions, examples, prompts, anything…"></textarea>
+            <div class="editor-foot">
+                <span id="saveStatus" class="save-status saved">● Saved</span>
+                <span id="charCount" class="char-count">0 chars · 0 words</span>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bulk Add Modal -->
+    <div class="modal-overlay" id="bulkModal" hidden>
+        <div class="modal">
+            <div class="modal-head">
+                <h2>Add Multiple Skills</h2>
+                <button class="btn-icon" id="bulkClose">✕</button>
+            </div>
+            <div class="modal-tabs">
+                <button class="tab active" data-tab="paste">📝 Paste</button>
+                <button class="tab" data-tab="json">📋 JSON</button>
+                <button class="tab" data-tab="file">📁 File</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-pane active" data-pane="paste">
+                    <p class="hint">One skill per line. Use <code>|</code> to separate fields:<br><code>Name | Category | Body</code></p>
+                    <textarea id="bulkPaste" placeholder="Brainstorming | Thinking | Use divergent thinking first…
+Cold Email | Marketing | Personalize the first line…
+Three.js | Frontend | Scene + Camera + Renderer…"></textarea>
+                </div>
+                <div class="tab-pane" data-pane="json">
+                    <p class="hint">Paste a JSON array of skill objects.</p>
+                    <textarea id="bulkJson" placeholder='[{"name":"Skill 1","category":"Cat","body":"…","tags":["a","b"]}]'></textarea>
+                </div>
+                <div class="tab-pane" data-pane="file">
+                    <p class="hint">Upload a JSON or .txt file (paste-format).</p>
+                    <label class="file-drop" for="bulkFile">
+                        <span class="file-icon">📎</span>
+                        <span class="file-text">Click to choose file</span>
+                        <input type="file" id="bulkFile" accept=".json,.txt" hidden>
+                    </label>
+                    <div id="fileChosen" class="file-chosen"></div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn-secondary" id="bulkCancel">Cancel</button>
+                <button class="btn-primary" id="bulkAdd">Add Skills</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Settings Modal -->
+    <div class="modal-overlay" id="cloudModal" hidden>
+        <div class="modal">
+            <div class="modal-head">
+                <h2>☁ Supabase Cloud Sync</h2>
+                <button class="btn-icon" id="cloudClose">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="hint">
+                    Connect to your Supabase project to sync skills across devices.
+                    Get the URL and anon key from your project's <strong>Settings → API</strong>.
+                </p>
+                <p class="hint">
+                    First time? Run <code>supabase-schema.sql</code> in the SQL Editor to create the <code>skills</code> table.
+                </p>
+                <div class="field-row">
+                    <label>Project URL</label>
+                    <input type="text" id="supaUrl" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div class="field-row">
+                    <label>Anon / Public Key</label>
+                    <input type="text" id="supaKey" placeholder="eyJhbG…">
+                </div>
+                <div id="cloudStatus" class="cloud-status"></div>
+                <div class="cloud-actions">
+                    <button class="btn-secondary" id="cloudTest">Test Connection</button>
+                    <button class="btn-secondary" id="cloudPush" title="Upload all local skills to cloud">⬆ Push Local → Cloud</button>
+                    <button class="btn-secondary btn-danger-text" id="cloudDisconnect">Disconnect</button>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn-secondary" id="cloudCancel">Close</button>
+                <button class="btn-primary" id="cloudSave">Save & Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
