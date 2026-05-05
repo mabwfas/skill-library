@@ -1,0 +1,13 @@
+{
+  "name": "skill-library",
+  "version": "1.0.0",
+  "description": "Personal skill library — open-book carousel UI, Supabase cloud sync, public /skill/<id> endpoint with auto-apply directive",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "import": "node scripts/import-skills.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

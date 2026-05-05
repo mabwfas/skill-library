@@ -1,188 +1,34 @@
 /**
- * db.js — Storage abstraction
+ * db.js — Supabase storage layer (auto-connected)
  *
- * Two backends, transparent to the app:
- *   - Supabase  (cloud sync, used when URL + key are configured)
- *   - localStorage (offline fallback, default)
+ * Connection is hardcoded — the app always syncs to the same database.
+ * The anon key is safe in client code (RLS policies in supabase-schema.sql
+ * govern access).
  *
  * Schema (matches supabase-schema.sql):
- *   skills(id text pk, name text, category text, tags text[], body text,
- *          updated_at timestamptz)
+ *   skills(id text pk, name text, category text, tags text[],
+ *          summary text[], body text, updated_at timestamptz)
  */
 
-const LS_DATA_KEY = 'skillLibrary.v2';
-const LS_CONFIG_KEY = 'skillLibrary.supabase';
+const SUPA_URL = 'https://ddyflncpimwxutqvuvwx.supabase.co';
+const SUPA_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkeWZsbmNwaW13eHV0cXZ1dnd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTQ4NjIsImV4cCI6MjA5MzMzMDg2Mn0.s-UA4_HtqTpbJDeLTg03DiBkWAHs2IoT4gwziPmMiRA';
 
-let _client = null;        // supabase client (or null)
-let _config = loadConfig();
-
-function loadConfig() {
-    try {
-        const raw = localStorage.getItem(LS_CONFIG_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-}
-
-function saveConfig(cfg) {
-    if (cfg) localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(cfg));
-    else localStorage.removeItem(LS_CONFIG_KEY);
-    _config = cfg;
-    _client = null; // force re-init
-}
-
-function isCloudMode() {
-    return !!(_config && _config.url && _config.anonKey);
-}
+let _client = null;
 
 function getClient() {
-    if (!isCloudMode()) return null;
     if (_client) return _client;
     if (typeof window.supabase === 'undefined') {
         console.warn('Supabase SDK not loaded yet');
         return null;
     }
-    _client = window.supabase.createClient(_config.url, _config.anonKey, {
+    _client = window.supabase.createClient(SUPA_URL, SUPA_ANON_KEY, {
         auth: { persistSession: false }
     });
     return _client;
 }
 
 // ==========================================
-// localStorage backend
-// ==========================================
-function lsLoad() {
-    try {
-        const raw = localStorage.getItem(LS_DATA_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-}
-function lsSave(skills) {
-    localStorage.setItem(LS_DATA_KEY, JSON.stringify(skills));
-}
-
-// ==========================================
-// Public API — all async (await everywhere in app.js)
-// ==========================================
-const DB = {
-    // Setup helpers
-    isCloudMode,
-    getConfig: () => _config ? { ...(_config) } : null,
-    setConfig: saveConfig,
-
-    // Test the connection — returns { ok, message }
-    async testConnection(cfg) {
-        if (!cfg || !cfg.url || !cfg.anonKey) {
-            return { ok: false, message: 'URL and key required' };
-        }
-        if (typeof window.supabase === 'undefined') {
-            return { ok: false, message: 'Supabase SDK not loaded' };
-        }
-        try {
-            const c = window.supabase.createClient(cfg.url, cfg.anonKey, {
-                auth: { persistSession: false }
-            });
-            const { error } = await c.from('skills').select('id', { count: 'exact', head: true });
-            if (error) return { ok: false, message: error.message };
-            return { ok: true, message: 'Connected!' };
-        } catch (e) {
-            return { ok: false, message: e.message };
-        }
-    },
-
-    // Load all skills (paginated — Supabase caps single requests at 1000)
-    async list() {
-        if (!isCloudMode()) {
-            return lsLoad();
-        }
-        const c = getClient();
-        const PAGE = 1000;
-        const all = [];
-        for (let from = 0; ; from += PAGE) {
-            const { data, error } = await c
-                .from('skills')
-                .select('*')
-                .order('updated_at', { ascending: false })
-                .range(from, from + PAGE - 1);
-            if (error) { console.error('Supabase list error:', error); throw error; }
-            if (!data || data.length === 0) break;
-            all.push(...data);
-            if (data.length < PAGE) break;
-        }
-        return all.map(rowToSkill);
-    },
-
-    // Legacy single-page helper kept for reference (unused now)
-    async _legacyListSinglePage() {
-        const c = getClient();
-        const { data, error } = await c.from('skills').select('*').order('updated_at', { ascending: false });
-        if (error) {
-            console.error('Supabase list error:', error);
-            throw error;
-        }
-        return data.map(rowToSkill);
-    },
-
-    // Upsert one skill (insert or update by id)
-    async upsert(skill) {
-        if (!isCloudMode()) {
-            const all = lsLoad() || [];
-            const idx = all.findIndex(s => s.id === skill.id);
-            if (idx >= 0) all[idx] = skill;
-            else all.unshift(skill);
-            lsSave(all);
-            return skill;
-        }
-        const c = getClient();
-        const row = skillToRow(skill);
-        const { data, error } = await c.from('skills').upsert(row).select().single();
-        if (error) { console.error('Supabase upsert error:', error); throw error; }
-        return rowToSkill(data);
-    },
-
-    // Bulk insert (used by import)
-    async insertMany(skills) {
-        if (!isCloudMode()) {
-            const all = lsLoad() || [];
-            lsSave([...skills, ...all]);
-            return skills;
-        }
-        const c = getClient();
-        const rows = skills.map(skillToRow);
-        const { data, error } = await c.from('skills').upsert(rows).select();
-        if (error) { console.error('Supabase insertMany error:', error); throw error; }
-        return data.map(rowToSkill);
-    },
-
-    // Replace whole list (used after local edits in fallback mode, or manual sync push)
-    async replaceAll(skills) {
-        if (!isCloudMode()) {
-            lsSave(skills);
-            return skills;
-        }
-        // In cloud mode, replaceAll = wipe + insertMany. Used for "push local cache to cloud."
-        const c = getClient();
-        await c.from('skills').delete().neq('id', '__sentinel__');
-        if (skills.length === 0) return [];
-        const { data, error } = await c.from('skills').insert(skills.map(skillToRow)).select();
-        if (error) throw error;
-        return data.map(rowToSkill);
-    },
-
-    // Delete one skill
-    async remove(id) {
-        if (!isCloudMode()) {
-            const all = lsLoad() || [];
-            lsSave(all.filter(s => s.id !== id));
-            return;
-        }
-        const c = getClient();
-        const { error } = await c.from('skills').delete().eq('id', id);
-        if (error) throw error;
-    },
-};
-
-// ==========================================
-// Row <-> Skill (snake_case <-> camelCase, defaults)
+// Row <-> Skill (snake_case <-> camelCase)
 // ==========================================
 function skillToRow(s) {
     return {
@@ -205,5 +51,75 @@ function rowToSkill(r) {
         body: r.body || '',
     };
 }
+
+// ==========================================
+// Public API — always async, always Supabase
+// ==========================================
+const DB = {
+    /** Always cloud now — kept for legacy callers. */
+    isCloudMode: () => true,
+
+    /** Load all skills (paginated; Supabase caps at 1000 per request). */
+    async list() {
+        const c = getClient();
+        if (!c) throw new Error('Supabase client not available');
+        const PAGE = 1000;
+        const all = [];
+        for (let from = 0; ; from += PAGE) {
+            const { data, error } = await c
+                .from('skills')
+                .select('*')
+                .order('updated_at', { ascending: false })
+                .range(from, from + PAGE - 1);
+            if (error) { console.error('Supabase list error:', error); throw error; }
+            if (!data || data.length === 0) break;
+            all.push(...data);
+            if (data.length < PAGE) break;
+        }
+        return all.map(rowToSkill);
+    },
+
+    /** Insert or update one skill. */
+    async upsert(skill) {
+        const c = getClient();
+        const { data, error } = await c.from('skills').upsert(skillToRow(skill)).select().single();
+        if (error) { console.error('Supabase upsert error:', error); throw error; }
+        return rowToSkill(data);
+    },
+
+    /** Bulk insert (used by import). */
+    async insertMany(skills) {
+        const c = getClient();
+        const rows = skills.map(skillToRow);
+        const { data, error } = await c.from('skills').upsert(rows).select();
+        if (error) { console.error('Supabase insertMany error:', error); throw error; }
+        return data.map(rowToSkill);
+    },
+
+    /** Delete one skill by id. */
+    async remove(id) {
+        const c = getClient();
+        const { error } = await c.from('skills').delete().eq('id', id);
+        if (error) { console.error('Supabase remove error:', error); throw error; }
+    },
+
+    /**
+     * Subscribe to real-time changes (cross-device sync).
+     * Callback fires on INSERT/UPDATE/DELETE of any skill row.
+     */
+    subscribe(callback) {
+        const c = getClient();
+        if (!c) return () => {};
+        const channel = c
+            .channel('skills-realtime')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'skills' },
+                (payload) => callback(payload)
+            )
+            .subscribe();
+        return () => { c.removeChannel(channel); };
+    },
+};
 
 window.DB = DB;

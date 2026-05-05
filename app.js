@@ -30,6 +30,23 @@ async function init() {
     updateDbModeIndicator();
     await loadSkills();
     render();
+    subscribeToRealtime();
+}
+
+let _realtimeReloadTimer = null;
+function subscribeToRealtime() {
+    if (!window.DB.subscribe) return;
+    window.DB.subscribe(() => {
+        // Debounce — many writes may land in quick succession
+        clearTimeout(_realtimeReloadTimer);
+        _realtimeReloadTimer = setTimeout(async () => {
+            try {
+                const data = await window.DB.list();
+                state.skills = data || [];
+                render();
+            } catch (e) { console.warn('Realtime refresh failed:', e); }
+        }, 500);
+    });
 }
 
 async function loadSkills() {
@@ -45,13 +62,9 @@ async function loadSkills() {
 
 function updateDbModeIndicator() {
     const el = document.getElementById('dbMode');
-    if (window.DB.isCloudMode()) {
-        el.textContent = 'Cloud · Synced';
-        el.classList.add('cloud');
-    } else {
-        el.textContent = 'Local';
-        el.classList.remove('cloud');
-    }
+    if (!el) return;
+    el.textContent = '● Synced';
+    el.classList.add('cloud');
 }
 
 // ==========================================
@@ -556,18 +569,6 @@ function bindEvents() {
         document.getElementById('sidebar').classList.toggle('open');
     });
 
-    // Cloud / Supabase modal
-    document.getElementById('settingsBtn').addEventListener('click', openCloudModal);
-    document.getElementById('cloudClose').addEventListener('click', closeCloudModal);
-    document.getElementById('cloudCancel').addEventListener('click', closeCloudModal);
-    document.getElementById('cloudTest').addEventListener('click', testCloudConnection);
-    document.getElementById('cloudSave').addEventListener('click', saveCloudConfig);
-    document.getElementById('cloudPush').addEventListener('click', pushLocalToCloud);
-    document.getElementById('cloudDisconnect').addEventListener('click', disconnectCloud);
-    document.getElementById('cloudModal').addEventListener('click', (e) => {
-        if (e.target.id === 'cloudModal') closeCloudModal();
-    });
-
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -588,84 +589,6 @@ function bindEvents() {
             openBulkModal();
         }
     });
-}
-
-// ==========================================
-// Cloud / Supabase
-// ==========================================
-function openCloudModal() {
-    const cfg = window.DB.getConfig();
-    document.getElementById('supaUrl').value = cfg ? cfg.url : '';
-    document.getElementById('supaKey').value = cfg ? cfg.anonKey : '';
-    document.getElementById('cloudStatus').innerHTML = window.DB.isCloudMode()
-        ? '<span class="status-ok">● Connected</span>'
-        : '<span class="status-mute">Not connected</span>';
-    document.getElementById('cloudModal').hidden = false;
-    setTimeout(() => document.getElementById('supaUrl').focus(), 50);
-}
-
-function closeCloudModal() {
-    document.getElementById('cloudModal').hidden = true;
-}
-
-async function testCloudConnection() {
-    const url = document.getElementById('supaUrl').value.trim();
-    const anonKey = document.getElementById('supaKey').value.trim();
-    setCloudStatus('testing', 'Testing…');
-    const result = await window.DB.testConnection({ url, anonKey });
-    setCloudStatus(result.ok ? 'ok' : 'err', result.message);
-}
-
-async function saveCloudConfig() {
-    const url = document.getElementById('supaUrl').value.trim();
-    const anonKey = document.getElementById('supaKey').value.trim();
-    if (!url || !anonKey) { setCloudStatus('err', 'URL and key required'); return; }
-    setCloudStatus('testing', 'Connecting…');
-    const result = await window.DB.testConnection({ url, anonKey });
-    if (!result.ok) { setCloudStatus('err', result.message); return; }
-    window.DB.setConfig({ url, anonKey });
-    setCloudStatus('ok', 'Connected — reloading…');
-    updateDbModeIndicator();
-    await loadSkills();
-    render();
-    setTimeout(() => closeCloudModal(), 800);
-    toast('Cloud sync enabled');
-}
-
-async function pushLocalToCloud() {
-    const url = document.getElementById('supaUrl').value.trim();
-    const anonKey = document.getElementById('supaKey').value.trim();
-    if (!url || !anonKey) { setCloudStatus('err', 'Save config first'); return; }
-    if (!confirm('This wipes the cloud table and uploads your current local skills. Continue?')) return;
-    setCloudStatus('testing', 'Pushing…');
-    // Temporarily set config
-    const prev = window.DB.getConfig();
-    window.DB.setConfig({ url, anonKey });
-    try {
-        await window.DB.replaceAll(state.skills);
-        setCloudStatus('ok', `Pushed ${state.skills.length} skills`);
-        updateDbModeIndicator();
-        toast('Local pushed to cloud');
-    } catch (e) {
-        setCloudStatus('err', e.message);
-        if (prev) window.DB.setConfig(prev); else window.DB.setConfig(null);
-    }
-}
-
-async function disconnectCloud() {
-    if (!confirm('Disconnect from cloud? Your local cache stays intact.')) return;
-    window.DB.setConfig(null);
-    updateDbModeIndicator();
-    setCloudStatus('mute', 'Disconnected');
-    await loadSkills();
-    render();
-    toast('Disconnected from cloud');
-}
-
-function setCloudStatus(kind, msg) {
-    const el = document.getElementById('cloudStatus');
-    const cls = kind === 'ok' ? 'status-ok' : kind === 'err' ? 'status-err' : kind === 'testing' ? 'status-mute' : 'status-mute';
-    el.innerHTML = `<span class="${cls}">${escapeHtml(msg)}</span>`;
 }
 
 // ==========================================

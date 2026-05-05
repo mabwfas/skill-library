@@ -1,6 +1,10 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/skill/:id", "destination": "/api/skill/:id" },
+    { "source": "/s/:id", "destination": "/api/skill/:id" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

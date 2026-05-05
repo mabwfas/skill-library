@@ -27,9 +27,6 @@
                     <h1>Library</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-icon-sm" id="settingsBtn" aria-label="Cloud / Supabase settings" title="Cloud / Supabase">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.65-8.69A6 6 0 0 0 4 13a4 4 0 0 0 4 4z"/></svg>
-                    </button>
                     <button class="btn-icon-sm" id="bulkAddBtn" aria-label="Bulk add / Import" title="Bulk add / Import">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     </button>
@@ -166,43 +163,6 @@ Three.js | Frontend | Scene + Camera + Renderer…"></textarea>
             <div class="modal-foot">
                 <button class="btn-secondary" id="bulkCancel">Cancel</button>
                 <button class="btn-primary" id="bulkAdd">Add Skills</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Supabase Settings Modal -->
-    <div class="modal-overlay" id="cloudModal" hidden>
-        <div class="modal">
-            <div class="modal-head">
-                <h2>☁ Supabase Cloud Sync</h2>
-                <button class="btn-icon" id="cloudClose">✕</button>
-            </div>
-            <div class="modal-body">
-                <p class="hint">
-                    Connect to your Supabase project to sync skills across devices.
-                    Get the URL and anon key from your project's <strong>Settings → API</strong>.
-                </p>
-                <p class="hint">
-                    First time? Run <code>supabase-schema.sql</code> in the SQL Editor to create the <code>skills</code> table.
-                </p>
-                <div class="field-row">
-                    <label>Project URL</label>
-                    <input type="text" id="supaUrl" placeholder="https://xxxxx.supabase.co">
-                </div>
-                <div class="field-row">
-                    <label>Anon / Public Key</label>
-                    <input type="text" id="supaKey" placeholder="eyJhbG…">
-                </div>
-                <div id="cloudStatus" class="cloud-status"></div>
-                <div class="cloud-actions">
-                    <button class="btn-secondary" id="cloudTest">Test Connection</button>
-                    <button class="btn-secondary" id="cloudPush" title="Upload all local skills to cloud">⬆ Push Local → Cloud</button>
-                    <button class="btn-secondary btn-danger-text" id="cloudDisconnect">Disconnect</button>
-                </div>
-            </div>
-            <div class="modal-foot">
-                <button class="btn-secondary" id="cloudCancel">Close</button>
-                <button class="btn-primary" id="cloudSave">Save & Connect</button>
             </div>
         </div>
     </div>
