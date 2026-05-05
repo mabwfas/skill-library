@@ -89,11 +89,30 @@ const DB = {
         }
     },
 
-    // Load all skills
+    // Load all skills (paginated — Supabase caps single requests at 1000)
     async list() {
         if (!isCloudMode()) {
             return lsLoad();
         }
+        const c = getClient();
+        const PAGE = 1000;
+        const all = [];
+        for (let from = 0; ; from += PAGE) {
+            const { data, error } = await c
+                .from('skills')
+                .select('*')
+                .order('updated_at', { ascending: false })
+                .range(from, from + PAGE - 1);
+            if (error) { console.error('Supabase list error:', error); throw error; }
+            if (!data || data.length === 0) break;
+            all.push(...data);
+            if (data.length < PAGE) break;
+        }
+        return all.map(rowToSkill);
+    },
+
+    // Legacy single-page helper kept for reference (unused now)
+    async _legacyListSinglePage() {
         const c = getClient();
         const { data, error } = await c.from('skills').select('*').order('updated_at', { ascending: false });
         if (error) {
@@ -171,6 +190,7 @@ function skillToRow(s) {
         name: s.name || 'Untitled',
         category: s.category || 'General',
         tags: Array.isArray(s.tags) ? s.tags : [],
+        summary: Array.isArray(s.summary) ? s.summary : [],
         body: s.body || '',
         updated_at: new Date().toISOString(),
     };
@@ -181,6 +201,7 @@ function rowToSkill(r) {
         name: r.name,
         category: r.category,
         tags: r.tags || [],
+        summary: r.summary || [],
         body: r.body || '',
     };
 }

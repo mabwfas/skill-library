@@ -4,23 +4,8 @@
  * Storage: window.DB (Supabase if configured, localStorage otherwise)
  */
 
-const SAMPLE_SKILLS = [
-    { id: 's1',  name: 'Brainstorming',          category: 'Thinking',     tags: ['ideation','creativity'], body: 'Use divergent thinking first — generate 20 ideas without judgment. Then converge: rank by impact × feasibility. Reframe constraints as opportunities.\n\nTime-box ideation to 15 minutes. Quantity beats quality at the start.' },
-    { id: 's2',  name: 'Writing Plans',          category: 'Workflow',     tags: ['planning','docs'],       body: 'Every change ≥3 steps gets a plan.\n\nPlan = goal, steps, files touched, verification. Plans prevent rework — write them in 5 min, save 50.' },
-    { id: 's3',  name: 'Test-Driven Dev',        category: 'Engineering',  tags: ['testing','quality'],     body: 'Red → Green → Refactor.\n\n1. Write the failing test first.\n2. Make it pass with minimal code.\n3. Then clean up.\n4. Repeat.' },
-    { id: 's4',  name: 'Systematic Debugging',   category: 'Engineering',  tags: ['debug','process'],       body: '1. Reproduce reliably.\n2. Bisect — what changed?\n3. Form hypothesis.\n4. Test hypothesis.\n5. Fix root cause, not symptom.' },
-    { id: 's5',  name: 'Code Review',            category: 'Engineering',  tags: ['quality','team'],        body: 'Review for: correctness, design, readability, tests, security.\n\nComment with intent — suggest, do not command. Approve quickly when good.' },
-    { id: 's6',  name: 'Cold Email',             category: 'Marketing',    tags: ['sales','outreach'],      body: 'Personalize the first line. State value in <3 lines. End with one specific ask. Keep it under 100 words. Follow up 3x.' },
-    { id: 's7',  name: 'Marketing Psychology',   category: 'Marketing',    tags: ['copy','persuasion'],     body: 'Loss aversion > gain framing.\nSpecificity > vagueness.\nSocial proof > self-praise.\nMake the next click obvious.' },
-    { id: 's8',  name: 'Landing Page CRO',       category: 'Marketing',    tags: ['conversion','design'],   body: 'Above fold = problem + promise + proof + CTA.\nOne goal per page. Friction kills — every field, every word matters.' },
-    { id: 's9',  name: 'SEO Audit',              category: 'Marketing',    tags: ['seo','content'],         body: 'Crawlability first (robots, sitemap, redirects). Then content gaps. Then internal links. Backlinks last.' },
-    { id: 's10', name: 'Prompt Engineering',     category: 'AI',           tags: ['llm','prompting'],       body: 'Role + Task + Context + Format + Examples.\n\nIterate prompts like you iterate code. Prefer specific over clever.' },
-    { id: 's11', name: 'RAG Implementation',     category: 'AI',           tags: ['llm','retrieval'],       body: 'Chunk size matters more than embedding model. Hybrid search (BM25 + vector) beats pure vector. Re-rank top-K.' },
-    { id: 's12', name: 'Three.js Basics',        category: 'Frontend',     tags: ['3d','webgl'],            body: 'Scene + Camera + Renderer = the holy trinity.\nGeometry + Material = Mesh.\nrequestAnimationFrame loop renders each frame.' },
-    { id: 's13', name: 'React Best Practices',   category: 'Frontend',     tags: ['react','components'],    body: 'Server components by default. Co-locate state. Lift only when needed. Avoid useEffect for derived data.' },
-    { id: 's14', name: 'Tailwind Patterns',      category: 'Frontend',     tags: ['css','tailwind'],        body: 'Compose with @apply only in design system files. Use arbitrary values sparingly. Extract components, not classes.' },
-    { id: 's15', name: 'Git Workflows',          category: 'Workflow',     tags: ['git','version-control'], body: 'Atomic commits. Imperative mood subject. Body explains why. Rebase before pushing. Merge with --no-ff for features.' },
-];
+// Sample skills removed — empty library starts empty.
+// Use the bulk-import button (📥) or scripts/import-skills.mjs to populate.
 
 const state = {
     skills: [],
@@ -28,7 +13,13 @@ const state = {
     searchQuery: '',
     activeCategory: null, // null = All
     saveTimer: null,
+    searchTimer: null,
+    visibleBookCount: 36,   // lazy-render batch size (smaller = faster TTI)
+    sidebarLimit: 150,      // cap nav rendering
 };
+
+const BOOK_BATCH = 60;
+let _loadMoreObserver = null;
 
 // ==========================================
 // Init
@@ -43,17 +34,12 @@ async function init() {
 
 async function loadSkills() {
     try {
-        let data = await window.DB.list();
-        if (!data || data.length === 0) {
-            // First run — seed sample skills
-            data = SAMPLE_SKILLS.slice();
-            await window.DB.insertMany(data);
-        }
-        state.skills = data;
+        const data = await window.DB.list();
+        state.skills = data || [];
     } catch (err) {
-        console.error('Load failed, using samples:', err);
-        toast('Load failed: ' + err.message + ' — using local samples');
-        state.skills = SAMPLE_SKILLS.slice();
+        console.error('Load failed:', err);
+        toast('Load failed: ' + err.message);
+        state.skills = [];
     }
 }
 
@@ -121,6 +107,7 @@ function renderCategoryChips() {
         el.addEventListener('click', () => {
             const cat = el.dataset.cat || null;
             state.activeCategory = cat;
+            resetVisibleCount();
             render();
         });
     });
@@ -129,12 +116,19 @@ function renderCategoryChips() {
 function renderSidebar() {
     const nav = document.getElementById('skillNav');
     const filtered = getFilteredSkills();
-    nav.innerHTML = filtered.map(s => `
+    const cap = state.sidebarLimit;
+    const shown = filtered.slice(0, cap);
+    const overflow = Math.max(0, filtered.length - cap);
+
+    nav.innerHTML = shown.map(s => `
         <div class="nav-item ${s.id === state.currentId ? 'active' : ''}" data-id="${s.id}">
-            <span class="nav-dot" style="background: ${dotColor(categoryColor(s.category))}; color: ${dotColor(categoryColor(s.category))};"></span>
+            <span class="nav-dot" style="background: ${dotColor(categoryColor(s.category))};"></span>
             <span class="nav-name">${escapeHtml(s.name)}</span>
         </div>
-    `).join('');
+    `).join('') + (overflow > 0
+        ? `<div class="nav-overflow">+ ${overflow} more — refine search to see them</div>`
+        : '');
+
     nav.querySelectorAll('.nav-item').forEach(el => {
         el.addEventListener('click', () => openSkill(el.dataset.id));
     });
@@ -147,7 +141,7 @@ function renderCarousel() {
     const visEl = document.getElementById('visibleCount');
     const titleEl = document.getElementById('categoryTitle');
 
-    visEl.textContent = filtered.length;
+    visEl.textContent = filtered.length.toLocaleString();
     titleEl.textContent = state.activeCategory || 'All Skills';
 
     if (filtered.length === 0) {
@@ -157,33 +151,95 @@ function renderCarousel() {
     }
     empty.hidden = true;
 
-    track.innerHTML = filtered.map(s => {
-        const color = categoryColor(s.category);
-        return `
-            <div class="book ${s.id === state.currentId ? 'active' : ''}" data-id="${s.id}" data-color="${color}">
-                <div class="book-cover">
-                    <div class="book-inner">
-                        <div class="book-page book-page-left"></div>
-                        <div class="book-page book-page-right"></div>
-                        <div class="book-title-center">${escapeHtml(s.name)}</div>
-                        <div class="book-bookmark"></div>
+    const visible = filtered.slice(0, state.visibleBookCount);
+    const hasMore = filtered.length > visible.length;
+
+    track.innerHTML = visible.map((s, i) => bookHTML(s, i)).join('') +
+        (hasMore ? '<div id="loadMoreSentinel" class="load-sentinel" aria-hidden="true"></div>' : '');
+
+    attachBookHandlers(track);
+    if (hasMore) attachLoadMoreObserver(filtered.length);
+}
+
+function bookHTML(s, i) {
+    const color = categoryColor(s.category);
+    const num = String(i + 1).padStart(2, '0');
+    const bullets = (s.summary && s.summary.length)
+        ? s.summary.slice(0, 3)
+        : [];
+    const bulletsHTML = bullets.length
+        ? `<ul class="book-bullets">${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>`
+        : '<span class="book-foot-text">a study</span>';
+    return `
+        <article class="book ${s.id === state.currentId ? 'active' : ''}" data-id="${s.id}" data-color="${color}" tabindex="0" role="button" aria-label="Open ${escapeHtml(s.name)}">
+            <div class="book-cover">
+                <div class="book-spine"></div>
+                <div class="book-content">
+                    <div class="book-meta">
+                        <span class="book-num">№ ${num}</span>
+                        <span class="book-cat">${escapeHtml(s.category || 'General')}</span>
+                    </div>
+                    <h3 class="book-name">${escapeHtml(s.name)}</h3>
+                    <div class="book-rule"></div>
+                    <div class="book-foot">
+                        ${bulletsHTML}
                     </div>
                 </div>
             </div>
-        `;
-    }).join('');
+        </article>
+    `;
+}
 
+function attachBookHandlers(track) {
     track.querySelectorAll('.book').forEach(el => {
-        el.addEventListener('click', (e) => {
-            // Don't open if user was dragging
-            if (track.classList.contains('was-dragging')) {
-                track.classList.remove('was-dragging');
-                e.stopPropagation();
-                return;
+        if (el._bound) return;
+        el._bound = true;
+        el.addEventListener('click', () => openSkill(el.dataset.id));
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openSkill(el.dataset.id);
             }
-            openSkill(el.dataset.id);
         });
     });
+}
+
+function attachLoadMoreObserver(totalCount) {
+    if (_loadMoreObserver) _loadMoreObserver.disconnect();
+    const sentinel = document.getElementById('loadMoreSentinel');
+    if (!sentinel) return;
+    const root = document.getElementById('carouselTrack');
+    _loadMoreObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && state.visibleBookCount < totalCount) {
+            state.visibleBookCount = Math.min(totalCount, state.visibleBookCount + BOOK_BATCH);
+            appendMoreBooks();
+        }
+    }, { root, rootMargin: '400px 0px' });
+    _loadMoreObserver.observe(sentinel);
+}
+
+function appendMoreBooks() {
+    const track = document.getElementById('carouselTrack');
+    const filtered = getFilteredSkills();
+    const currentCount = track.querySelectorAll('.book').length;
+    const next = filtered.slice(currentCount, state.visibleBookCount);
+    const sentinel = document.getElementById('loadMoreSentinel');
+    const html = next.map((s, i) => bookHTML(s, currentCount + i)).join('');
+    if (sentinel) {
+        sentinel.insertAdjacentHTML('beforebegin', html);
+    } else {
+        track.insertAdjacentHTML('beforeend', html);
+    }
+    attachBookHandlers(track);
+    if (state.visibleBookCount >= filtered.length && sentinel) {
+        sentinel.remove();
+        if (_loadMoreObserver) _loadMoreObserver.disconnect();
+    }
+}
+
+// Reset pagination on search/category change
+function resetVisibleCount() {
+    state.visibleBookCount = BOOK_BATCH;
 }
 
 function snippet(text, n) {
@@ -202,6 +258,7 @@ function openSkill(id) {
     document.getElementById('editorTitle').value = skill.name;
     document.getElementById('editorCategory').value = skill.category || '';
     document.getElementById('editorTags').value = (skill.tags || []).join(', ');
+    document.getElementById('editorSummary').value = (skill.summary || []).join('\n');
     document.getElementById('editorBody').value = skill.body || '';
     updateCharCount();
     setSaveStatus('saved');
@@ -229,6 +286,8 @@ async function commitEdit() {
     skill.category = document.getElementById('editorCategory').value.trim() || 'General';
     skill.tags = document.getElementById('editorTags').value
         .split(',').map(t => t.trim()).filter(Boolean);
+    skill.summary = document.getElementById('editorSummary').value
+        .split('\n').map(l => l.replace(/^[•\-*]\s*/, '').trim()).filter(Boolean);
     skill.body = document.getElementById('editorBody').value;
     try {
         await window.DB.upsert(skill);
@@ -461,7 +520,11 @@ function bindEvents() {
     document.getElementById('exportBtn').addEventListener('click', exportAll);
     document.getElementById('searchInput').addEventListener('input', (e) => {
         state.searchQuery = e.target.value;
-        render();
+        clearTimeout(state.searchTimer);
+        state.searchTimer = setTimeout(() => {
+            resetVisibleCount();
+            render();
+        }, 180);
     });
     document.getElementById('prevBtn').addEventListener('click', () => scrollCarousel(-1));
     document.getElementById('nextBtn').addEventListener('click', () => scrollCarousel(1));
@@ -472,6 +535,7 @@ function bindEvents() {
     document.getElementById('editorTitle').addEventListener('input', debounceSave);
     document.getElementById('editorCategory').addEventListener('input', debounceSave);
     document.getElementById('editorTags').addEventListener('input', debounceSave);
+    document.getElementById('editorSummary').addEventListener('input', debounceSave);
     document.getElementById('editorBody').addEventListener('input', () => { updateCharCount(); debounceSave(); });
 
     // Bulk modal
