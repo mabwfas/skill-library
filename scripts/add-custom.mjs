@@ -20,7 +20,7 @@ if (!SUPA_URL || !SUPA_KEY || !INSTA_SKILL_PATH || !LINKEDIN_SKILL_PATH) {
     process.exit(1);
 }
 
-const sanitize = s => String(s || '').replace(/ /g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+const sanitize = s => String(s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
 const insta = await fs.readFile(INSTA_SKILL_PATH, 'utf8');
 const linkedin = await fs.readFile(LINKEDIN_SKILL_PATH, 'utf8');

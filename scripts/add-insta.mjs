@@ -18,7 +18,6 @@ if (!SUPA_URL || !SUPA_KEY || !INSTA_SKILL_PATH) {
 }
 
 const body = (await fs.readFile(INSTA_SKILL_PATH, 'utf8'))
-    .replace(/ /g, '')
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
 const skill = {

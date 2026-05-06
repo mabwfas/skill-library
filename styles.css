@@ -1248,41 +1248,46 @@ svg { display: block; flex-shrink: 0; }
 }
 
 /* ============================================================================
-   VIEW TABS (sidebar) — Library / Command toggle
+   VIEW SEGMENTS — sleek segmented pill replacing static "Library" wordmark
    ============================================================================ */
-.view-tabs {
-    display: flex;
-    gap: 6px;
-    padding: 0 18px 12px;
-    border-bottom: 1px solid var(--border);
+.view-segments {
+    display: inline-flex;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 3px;
+    gap: 2px;
 }
-.view-tab {
-    flex: 1;
-    display: flex;
+.view-seg {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
+    gap: 6px;
     background: transparent;
-    border: 1px solid transparent;
+    border: none;
     color: var(--text-mute);
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 5px 11px;
+    border-radius: 7px;
     cursor: pointer;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.8rem;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    line-height: 1;
+    height: 28px;
 }
-.view-tab:hover { color: var(--text); background: rgba(212,164,74,0.08); }
-.view-tab.active {
+.view-seg:hover { color: var(--text); }
+.view-seg.active {
     color: var(--ink);
-    background: linear-gradient(180deg, var(--accent-hi), var(--accent-dim));
-    border-color: var(--accent);
-    box-shadow: 0 4px 14px var(--accent-glow);
+    background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+    box-shadow: 0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.25);
 }
-.view-tab svg { flex-shrink: 0; }
+.view-seg svg { flex-shrink: 0; opacity: 0.95; }
+.view-seg span { display: inline-block; }
+@media (max-width: 600px) {
+    .view-seg span { display: none; }
+    .view-seg { padding: 5px 9px; }
+}
 
 /* ============================================================================
    COMMAND CENTER — Pipeline / Workflow Builder

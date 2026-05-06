@@ -196,6 +196,14 @@ function bookHTML(s, i) {
         <article class="book ${s.id === state.currentId ? 'active' : ''}" data-id="${s.id}" data-color="${color}" tabindex="0" role="button" aria-label="Open ${escapeHtml(s.name)}">
             <div class="book-cover">
                 <div class="book-spine"></div>
+                <div class="book-actions">
+                    <button class="book-action" data-copy="body" data-id="${s.id}" title="Copy full skill (markdown + frontmatter)" aria-label="Copy skill body">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                    <button class="book-action" data-copy="url" data-id="${s.id}" title="Copy auto-apply URL for Claude Code" aria-label="Copy skill URL">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    </button>
+                </div>
                 <div class="book-content">
                     <div class="book-meta">
                         <span class="book-num">№ ${num}</span>
@@ -650,8 +658,10 @@ async function handleFileImport(files) {
 
 /** Parse a single file into a skill object. Supports .skill / .md / .markdown / .phd / .txt */
 function parseSkillFile(filename, content) {
+    // Strip only NULL bytes and other Postgres-incompatible control chars.
+    // Tabs (\x09), newlines (\x0A), carriage returns (\x0D) and the regular
+    // space (\x20) are PRESERVED — earlier versions accidentally stripped spaces.
     const cleaned = String(content || '')
-        .replace(/ /g, '')
         .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
     // YAML frontmatter (used in our SKILL.md format)
@@ -843,7 +853,7 @@ function getActiveWorkflow() {
 
 function bindCommandCenter() {
     // View tab toggling
-    document.querySelectorAll('.view-tab').forEach(btn => {
+    document.querySelectorAll('.view-seg').forEach(btn => {
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
@@ -907,7 +917,7 @@ function switchView(view, force = false) {
 
     state.view = view;
     document.body.dataset.view = view;
-    document.querySelectorAll('.view-tab').forEach(b => {
+    document.querySelectorAll('.view-seg').forEach(b => {
         b.classList.toggle('active', b.dataset.view === view);
         b.setAttribute('aria-selected', b.dataset.view === view ? 'true' : 'false');
     });
