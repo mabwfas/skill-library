@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Library</title>
-    <link rel="stylesheet" href="styles.css?v=20260506b">
+    <link rel="stylesheet" href="styles.css?v=20260506c">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Crimson+Pro:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -107,23 +107,6 @@
                 <input type="text" id="searchInput" placeholder="Search the archive…" aria-label="Search">
             </div>
 
-            <!-- Workflow list (Command view only) -->
-            <div class="cc-sidebar-section" id="workflowsSection" hidden>
-                <div class="cc-sb-head">
-                    <span class="cc-sb-eyebrow">Workflows</span>
-                    <button class="btn-icon-sm cc-sb-add" id="newWorkflowBtn" title="New workflow">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    </button>
-                </div>
-                <nav class="cc-workflow-list" id="workflowList"></nav>
-            </div>
-
-            <div class="cc-sidebar-section" id="ccSkillsSection" hidden>
-                <div class="cc-sb-head">
-                    <span class="cc-sb-eyebrow">Skills · drag onto a node</span>
-                </div>
-            </div>
-
             <div class="category-chips" id="categoryChips"></div>
 
             <nav class="skill-nav" id="skillNav"></nav>
@@ -173,48 +156,6 @@
             </div>
         </main>
 
-        <!-- Command Center (alternate view) -->
-        <main class="command-center" id="commandCenter" hidden>
-            <div class="cc-header">
-                <div class="cc-header-left">
-                    <span class="header-eyebrow">Pipeline</span>
-                    <h2 class="cc-title">Command Center</h2>
-                    <div class="cc-meta">
-                        <span class="cc-step-count" id="ccStepCount">0 steps</span>
-                        <span class="cc-status-pill" id="ccStatus" data-status="idle">
-                            <span class="cc-status-dot"></span>
-                            <span class="cc-status-text">Idle</span>
-                        </span>
-                    </div>
-                </div>
-                <div class="cc-header-right">
-                    <button class="btn-secondary" id="ccClearBtn" title="Clear all steps">Clear</button>
-                    <button class="btn-secondary" id="ccCopyChainBtn" title="Copy chain as markdown">Copy Chain</button>
-                    <button class="btn-primary cc-run-btn" id="ccRunBtn">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
-                        Run All
-                    </button>
-                </div>
-            </div>
-
-            <div class="cc-canvas">
-                <div class="workflow" id="workflow"></div>
-                <div class="cc-add-step-row">
-                    <button class="cc-add-step" id="ccAddStep">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Add Step
-                    </button>
-                </div>
-                <div class="cc-empty" id="ccEmpty" hidden>
-                    <div class="cc-empty-icon">
-                        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-                    </div>
-                    <h3>Build a workflow</h3>
-                    <p>Drag a skill from the sidebar onto a step. Output of each step pipes to the next.</p>
-                    <button class="btn-primary" id="ccEmptyAdd">Add first step</button>
-                </div>
-            </div>
-        </main>
 
         <!-- Right Editor Panel -->
         <section class="editor" id="editor" aria-hidden="true">
@@ -291,6 +232,84 @@ Three.js | Frontend | Scene + Camera + Renderer…"></textarea>
         </div>
     </div>
 
+    <!-- ============================================================
+         COMMAND CENTER — standalone dashboard shell
+         ============================================================ -->
+    <div class="cc-shell" id="ccShell" hidden>
+        <header class="cc-topbar">
+            <div class="cc-topbar-left">
+                <button class="cc-back" id="ccBackBtn" title="Back to Library">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Library
+                </button>
+                <div class="cc-brand">
+                    <span class="cc-brand-mark">⚡</span>
+                    <span class="cc-brand-name">Command Center</span>
+                </div>
+                <span class="cc-divider"></span>
+                <span class="cc-step-count" id="ccStepCount">0 steps</span>
+                <span class="cc-status-pill" id="ccStatus" data-status="idle">
+                    <span class="cc-status-dot"></span>
+                    <span class="cc-status-text">Idle</span>
+                </span>
+            </div>
+            <div class="cc-topbar-right">
+                <button class="cc-tb-btn" id="ccCopyChainBtn" title="Copy chain as markdown">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy
+                </button>
+                <button class="cc-tb-btn" id="ccClearBtn" title="Clear all steps">Clear</button>
+                <button class="cc-tb-btn cc-tb-run" id="ccRunBtn">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+                    Run All
+                </button>
+            </div>
+        </header>
+
+        <div class="cc-body">
+            <aside class="cc-dock">
+                <div class="cc-dock-section">
+                    <div class="cc-dock-head">
+                        <span class="cc-dock-label">Workflows</span>
+                        <button class="cc-dock-add" id="newWorkflowBtn" title="New workflow">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                    <nav class="cc-workflow-list" id="workflowList"></nav>
+                </div>
+
+                <div class="cc-dock-section cc-dock-grow">
+                    <div class="cc-dock-head">
+                        <span class="cc-dock-label">Skills · drag</span>
+                        <span class="cc-dock-count" id="ccSkillCount">0</span>
+                    </div>
+                    <div class="cc-dock-search">
+                        <input type="text" id="ccSkillSearch" placeholder="Filter skills…">
+                    </div>
+                    <nav class="cc-skill-list" id="ccSkillList"></nav>
+                </div>
+            </aside>
+
+            <main class="cc-canvas-wrap">
+                <div class="workflow" id="workflow"></div>
+                <div class="cc-add-step-row">
+                    <button class="cc-add-step" id="ccAddStep">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Step
+                    </button>
+                </div>
+                <div class="cc-empty" id="ccEmpty" hidden>
+                    <div class="cc-empty-icon">
+                        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    </div>
+                    <h3>Build a workflow</h3>
+                    <p>Drag a skill from the dock into a step. Output of each step pipes to the next.</p>
+                    <button class="btn-primary" id="ccEmptyAdd">Add first step</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
     <!-- Password gate for Command Center -->
     <div class="modal-overlay" id="ccGate" hidden>
         <div class="modal cc-gate-modal">
@@ -311,6 +330,6 @@ Three.js | Frontend | Scene + Camera + Renderer…"></textarea>
     <div class="toast" id="toast"></div>
 
     <script src="db.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=20260506c"></script>
 </body>
 </html>

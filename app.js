@@ -156,8 +156,6 @@ function renderSidebar() {
     nav.querySelectorAll('.nav-item').forEach(el => {
         el.addEventListener('click', () => openSkill(el.dataset.id));
     });
-    // Re-attach drag handlers for Command view
-    attachSkillDragHandlers();
 }
 
 function renderCarousel() {
@@ -856,10 +854,14 @@ function getActiveWorkflow() {
 }
 
 function bindCommandCenter() {
-    // View tab toggling
+    // View tab toggling — Library tab in sidebar
     document.querySelectorAll('.view-seg').forEach(btn => {
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
+
+    // Back button in CC topbar — return to library
+    const backBtn = document.getElementById('ccBackBtn');
+    if (backBtn) backBtn.addEventListener('click', () => switchView('library'));
 
     // Password gate
     const gateInput = document.getElementById('ccGatePassword');
@@ -902,6 +904,12 @@ function bindCommandCenter() {
         renderCommandCenter();
     });
 
+    // Skill dock filter
+    const skillSearch = document.getElementById('ccSkillSearch');
+    if (skillSearch) {
+        skillSearch.addEventListener('input', () => renderSkillDock());
+    }
+
     // Add step / Empty add / Clear / Run / Copy
     document.getElementById('ccAddStep').addEventListener('click', addStepToActive);
     document.getElementById('ccEmptyAdd').addEventListener('click', addStepToActive);
@@ -928,19 +936,13 @@ function switchView(view, opts = {}) {
         b.setAttribute('aria-selected', b.dataset.view === view ? 'true' : 'false');
     });
 
-    // Hide / show library bits and CC bits
     const isCmd = view === 'command';
-    document.querySelector('.carousel-area').hidden = isCmd;
-    document.getElementById('commandCenter').hidden = !isCmd;
-    document.getElementById('workflowsSection').hidden = !isCmd;
-    document.getElementById('ccSkillsSection').hidden = !isCmd;
 
-    // Hide Library-only sidebar bits in Command view
-    document.querySelector('.search-wrap').hidden = isCmd;
-    document.getElementById('categoryChips').hidden = isCmd;
-    // Brand title swap
-    const brand = document.getElementById('brandTitle');
-    if (brand) brand.textContent = isCmd ? 'Command' : 'Library';
+    // Library shell vs Command Center shell — full-viewport swap
+    const libApp = document.getElementById('app');
+    const ccShell = document.getElementById('ccShell');
+    if (libApp) libApp.hidden = isCmd;
+    if (ccShell) ccShell.hidden = !isCmd;
 
     // URL routing — push history state so Command Center has its own URL
     if (!fromHistory) {
@@ -968,7 +970,48 @@ function syncViewToUrl() {
 
 function renderCommandCenter() {
     renderWorkflowList();
+    renderSkillDock();
     renderActiveWorkflow();
+}
+
+function renderSkillDock() {
+    const wrap = document.getElementById('ccSkillList');
+    const countEl = document.getElementById('ccSkillCount');
+    if (!wrap) return;
+    const searchEl = document.getElementById('ccSkillSearch');
+    const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+    const items = state.skills.filter(s => {
+        if (!q) return true;
+        return s.name.toLowerCase().includes(q) ||
+            (s.category || '').toLowerCase().includes(q) ||
+            (s.tags || []).some(t => t.toLowerCase().includes(q));
+    });
+
+    if (countEl) countEl.textContent = String(items.length);
+
+    if (items.length === 0) {
+        wrap.innerHTML = `<div class="cc-dock-empty">${q ? 'No skills match.' : 'No skills in library yet.'}</div>`;
+        return;
+    }
+
+    wrap.innerHTML = items.slice(0, 200).map(s => `
+        <div class="cc-skill-item" draggable="true" data-id="${s.id}" title="${escapeHtml(s.category || 'General')} — drag to a step">
+            <span class="cc-skill-dot" style="background:${dotColor(categoryColor(s.category))};"></span>
+            <span class="cc-skill-name">${escapeHtml(s.name)}</span>
+        </div>
+    `).join('') + (items.length > 200
+        ? `<div class="cc-dock-overflow">+ ${items.length - 200} more — refine filter</div>`
+        : '');
+
+    wrap.querySelectorAll('.cc-skill-item').forEach(el => {
+        el.addEventListener('dragstart', (e) => {
+            el.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('text/skill-id', el.dataset.id);
+        });
+        el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    });
 }
 
 function renderWorkflowList() {
@@ -1337,22 +1380,6 @@ function copyChainAsMarkdown() {
         md.push('');
     });
     navigator.clipboard.writeText(md.join('\n')).then(() => toast('Chain copied as markdown'));
-}
-
-// Make sidebar nav-items draggable when in command view
-function attachSkillDragHandlers() {
-    document.querySelectorAll('.nav-item').forEach(el => {
-        if (el._dragBound) return;
-        el._dragBound = true;
-        el.draggable = true;
-        el.addEventListener('dragstart', (e) => {
-            if (state.view !== 'command') { e.preventDefault(); return; }
-            el.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'copy';
-            e.dataTransfer.setData('text/skill-id', el.dataset.id);
-        });
-        el.addEventListener('dragend', () => el.classList.remove('dragging'));
-    });
 }
 
 // ==========================================
