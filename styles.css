@@ -1248,46 +1248,48 @@ svg { display: block; flex-shrink: 0; }
 }
 
 /* ============================================================================
-   VIEW SEGMENTS — sleek segmented pill replacing static "Library" wordmark
+   VIEW SEGMENTS — full-width segmented pill on its own row in the sidebar
    ============================================================================ */
 .view-segments {
-    display: inline-flex;
+    display: flex;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 3px;
-    gap: 2px;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+    margin: 0 18px 12px;
 }
 .view-seg {
+    flex: 1 1 50%;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 8px;
     background: transparent;
     border: none;
     color: var(--text-mute);
-    padding: 5px 11px;
+    padding: 8px 10px;
     border-radius: 7px;
     cursor: pointer;
     font-family: 'Manrope', system-ui, sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
     line-height: 1;
-    height: 28px;
+    height: 34px;
+    white-space: nowrap;
 }
-.view-seg:hover { color: var(--text); }
+.view-seg:hover { color: var(--text); background: rgba(212,164,74,0.06); }
 .view-seg.active {
     color: var(--ink);
     background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
     box-shadow: 0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.25);
 }
+.view-seg.active:hover { background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%); }
 .view-seg svg { flex-shrink: 0; opacity: 0.95; }
 .view-seg span { display: inline-block; }
-@media (max-width: 600px) {
-    .view-seg span { display: none; }
-    .view-seg { padding: 5px 9px; }
-}
+.brand-title { font-size: 1.05rem; }
 
 /* ============================================================================
    COMMAND CENTER — Pipeline / Workflow Builder

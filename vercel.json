@@ -3,7 +3,9 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/skill/:id", "destination": "/api/skill/:id" },
-    { "source": "/s/:id", "destination": "/api/skill/:id" }
+    { "source": "/s/:id", "destination": "/api/skill/:id" },
+    { "source": "/command", "destination": "/index.html" },
+    { "source": "/command/:path*", "destination": "/index.html" }
   ],
   "headers": [
     {

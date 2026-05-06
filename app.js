@@ -35,9 +35,13 @@ async function init() {
     loadWorkflows();
     bindCommandCenter();
     bindImportExport();
+    // Browser back/forward → swap views
+    window.addEventListener('popstate', () => syncViewToUrl());
     await loadSkills();
     render();
     subscribeToRealtime();
+    // Restore view from URL on load (e.g., direct visit to /command)
+    syncViewToUrl();
 }
 
 let _realtimeReloadTimer = null;
@@ -863,11 +867,11 @@ function bindCommandCenter() {
     document.getElementById('ccGateUnlock').addEventListener('click', tryUnlock);
     document.getElementById('ccGateCancel').addEventListener('click', () => {
         document.getElementById('ccGate').hidden = true;
-        switchView('library', true);
+        switchView('library', { force: true });
     });
     gateInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') tryUnlock();
-        if (e.key === 'Escape') { document.getElementById('ccGate').hidden = true; switchView('library', true); }
+        if (e.key === 'Escape') { document.getElementById('ccGate').hidden = true; switchView('library', { force: true }); }
     });
 
     function tryUnlock() {
@@ -906,7 +910,8 @@ function bindCommandCenter() {
     document.getElementById('ccRunBtn').addEventListener('click', runAllNodes);
 }
 
-function switchView(view, force = false) {
+function switchView(view, opts = {}) {
+    const { force = false, fromHistory = false } = opts;
     if (view === 'command' && !force) {
         const unlocked = sessionStorage.getItem(CC_UNLOCK_KEY) === '1';
         if (!unlocked) {
@@ -923,13 +928,42 @@ function switchView(view, force = false) {
         b.setAttribute('aria-selected', b.dataset.view === view ? 'true' : 'false');
     });
 
+    // Hide / show library bits and CC bits
     const isCmd = view === 'command';
     document.querySelector('.carousel-area').hidden = isCmd;
     document.getElementById('commandCenter').hidden = !isCmd;
     document.getElementById('workflowsSection').hidden = !isCmd;
     document.getElementById('ccSkillsSection').hidden = !isCmd;
 
+    // Hide Library-only sidebar bits in Command view
+    document.querySelector('.search-wrap').hidden = isCmd;
+    document.getElementById('categoryChips').hidden = isCmd;
+    // Brand title swap
+    const brand = document.getElementById('brandTitle');
+    if (brand) brand.textContent = isCmd ? 'Command' : 'Library';
+
+    // URL routing — push history state so Command Center has its own URL
+    if (!fromHistory) {
+        const targetPath = isCmd ? '/command' : '/';
+        if (location.pathname !== targetPath) {
+            history.pushState({ view }, '', targetPath);
+        }
+    }
+
     if (isCmd) renderCommandCenter();
+    else render();
+}
+
+function syncViewToUrl() {
+    const path = location.pathname;
+    const isCmd = path === '/command' || path.endsWith('/command');
+    if (isCmd && sessionStorage.getItem(CC_UNLOCK_KEY) !== '1') {
+        // Need password before showing command — but render gate
+        document.getElementById('ccGate').hidden = false;
+        setTimeout(() => document.getElementById('ccGatePassword').focus(), 50);
+        return;
+    }
+    switchView(isCmd ? 'command' : 'library', { force: true, fromHistory: true });
 }
 
 function renderCommandCenter() {
