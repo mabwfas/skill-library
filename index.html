@@ -4,10 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Library</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260506b">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Crimson+Pro:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Inline critical styles for view-segments — guarantees correct render
+         even if external styles.css is cached/stale -->
+    <style>
+        .view-segments {
+            display: flex !important;
+            background: #1c1828 !important;
+            border: 1px solid #2a2438 !important;
+            border-radius: 10px !important;
+            padding: 4px !important;
+            gap: 4px !important;
+            margin: 0 18px 12px !important;
+        }
+        .view-seg {
+            flex: 1 1 50% !important;
+            display: inline-flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            background: transparent !important;
+            border: none !important;
+            color: #a8a18c !important;
+            padding: 8px 10px !important;
+            border-radius: 7px !important;
+            cursor: pointer !important;
+            font-family: 'Manrope', system-ui, sans-serif !important;
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
+            line-height: 1 !important;
+            height: 34px !important;
+            white-space: nowrap !important;
+            text-transform: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .view-seg:hover { color: #efe9d8 !important; background: rgba(212,164,74,0.08) !important; }
+        .view-seg.active {
+            color: #08070f !important;
+            background: linear-gradient(180deg, #f0c870 0%, #d4a44a 100%) !important;
+            box-shadow: 0 2px 8px rgba(212,164,74,0.35), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+        }
+        .view-seg svg { flex-shrink: 0 !important; width: 14px !important; height: 14px !important; }
+        .view-seg span { display: inline-block !important; }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
