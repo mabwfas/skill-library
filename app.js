@@ -877,7 +877,8 @@ function bindCommandCenter() {
             document.getElementById('ccGate').hidden = true;
             gateErr.hidden = true;
             gateInput.value = '';
-            renderCommandCenter();
+            // Now actually flip into command view (which re-checks unlock and renders)
+            switchView('command');
         } else {
             gateErr.hidden = false;
             gateInput.value = '';
