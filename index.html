@@ -27,13 +27,32 @@
                     <h1>Library</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-icon-sm" id="bulkAddBtn" aria-label="Bulk add / Import" title="Bulk add / Import">
+                    <button class="btn-icon-sm" id="quickImportBtn" aria-label="Import .skill / .md / .phd" title="Import file (.skill, .md, .phd)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </button>
+                    <button class="btn-icon-sm" id="quickExportBtn" aria-label="Export all skills" title="Export all (.zip / .md)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <button class="btn-icon-sm" id="bulkAddBtn" aria-label="Bulk add (paste / JSON)" title="Bulk add (paste / JSON)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
                     </button>
                     <button class="btn-add" id="addSkillBtn" aria-label="New skill" title="New skill (Ctrl+N)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </button>
                 </div>
+                <input type="file" id="quickImportInput" accept=".skill,.md,.phd,.markdown,.txt" multiple hidden>
+            </div>
+
+            <!-- View tabs -->
+            <div class="view-tabs" role="tablist">
+                <button class="view-tab active" data-view="library" role="tab" aria-selected="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Library
+                </button>
+                <button class="view-tab" data-view="command" role="tab" aria-selected="false">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    Command
+                </button>
             </div>
 
             <div class="search-wrap">
@@ -41,6 +60,23 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </span>
                 <input type="text" id="searchInput" placeholder="Search the archive…" aria-label="Search">
+            </div>
+
+            <!-- Workflow list (Command view only) -->
+            <div class="cc-sidebar-section" id="workflowsSection" hidden>
+                <div class="cc-sb-head">
+                    <span class="cc-sb-eyebrow">Workflows</span>
+                    <button class="btn-icon-sm cc-sb-add" id="newWorkflowBtn" title="New workflow">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                </div>
+                <nav class="cc-workflow-list" id="workflowList"></nav>
+            </div>
+
+            <div class="cc-sidebar-section" id="ccSkillsSection" hidden>
+                <div class="cc-sb-head">
+                    <span class="cc-sb-eyebrow">Skills · drag onto a node</span>
+                </div>
             </div>
 
             <div class="category-chips" id="categoryChips"></div>
@@ -89,6 +125,49 @@
                 <span class="hint-rule"></span>
                 <span class="hint-text">Open a volume to read</span>
                 <span class="hint-rule"></span>
+            </div>
+        </main>
+
+        <!-- Command Center (alternate view) -->
+        <main class="command-center" id="commandCenter" hidden>
+            <div class="cc-header">
+                <div class="cc-header-left">
+                    <span class="header-eyebrow">Pipeline</span>
+                    <h2 class="cc-title">Command Center</h2>
+                    <div class="cc-meta">
+                        <span class="cc-step-count" id="ccStepCount">0 steps</span>
+                        <span class="cc-status-pill" id="ccStatus" data-status="idle">
+                            <span class="cc-status-dot"></span>
+                            <span class="cc-status-text">Idle</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="cc-header-right">
+                    <button class="btn-secondary" id="ccClearBtn" title="Clear all steps">Clear</button>
+                    <button class="btn-secondary" id="ccCopyChainBtn" title="Copy chain as markdown">Copy Chain</button>
+                    <button class="btn-primary cc-run-btn" id="ccRunBtn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+                        Run All
+                    </button>
+                </div>
+            </div>
+
+            <div class="cc-canvas">
+                <div class="workflow" id="workflow"></div>
+                <div class="cc-add-step-row">
+                    <button class="cc-add-step" id="ccAddStep">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Step
+                    </button>
+                </div>
+                <div class="cc-empty" id="ccEmpty" hidden>
+                    <div class="cc-empty-icon">
+                        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    </div>
+                    <h3>Build a workflow</h3>
+                    <p>Drag a skill from the sidebar onto a step. Output of each step pipes to the next.</p>
+                    <button class="btn-primary" id="ccEmptyAdd">Add first step</button>
+                </div>
             </div>
         </main>
 
@@ -163,6 +242,23 @@ Three.js | Frontend | Scene + Camera + Renderer…"></textarea>
             <div class="modal-foot">
                 <button class="btn-secondary" id="bulkCancel">Cancel</button>
                 <button class="btn-primary" id="bulkAdd">Add Skills</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password gate for Command Center -->
+    <div class="modal-overlay" id="ccGate" hidden>
+        <div class="modal cc-gate-modal">
+            <div class="cc-gate-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h2 class="cc-gate-title">Command Center</h2>
+            <p class="cc-gate-sub">Restricted area. Enter password to continue.</p>
+            <input type="password" id="ccGatePassword" class="cc-gate-input" placeholder="Password" autocomplete="off">
+            <div class="cc-gate-error" id="ccGateError" hidden>Incorrect password.</div>
+            <div class="cc-gate-actions">
+                <button class="btn-secondary" id="ccGateCancel">Back to Library</button>
+                <button class="btn-primary" id="ccGateUnlock">Unlock</button>
             </div>
         </div>
     </div>
